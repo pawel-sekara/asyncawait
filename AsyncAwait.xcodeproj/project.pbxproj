@@ -13,6 +13,8 @@
 		D3B69FD71F20A2F00008176C /* AsyncAwait.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3B69FCD1F20A2F00008176C /* AsyncAwait.framework */; };
 		D3B69FDC1F20A2F00008176C /* AsyncAwaitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B69FDB1F20A2F00008176C /* AsyncAwaitTests.swift */; };
 		D3B69FDE1F20A2F00008176C /* AsyncAwait.h in Headers */ = {isa = PBXBuildFile; fileRef = D3B69FD01F20A2F00008176C /* AsyncAwait.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D3F1D3CC1F20FC9B001DA4DC /* Nimble.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3F1D3CB1F20FC9B001DA4DC /* Nimble.framework */; };
+		D3F1D3CE1F20FE33001DA4DC /* Nimble.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D3F1D3CB1F20FC9B001DA4DC /* Nimble.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -25,6 +27,19 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		D3F1D3CD1F20FE2C001DA4DC /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				D3F1D3CE1F20FE33001DA4DC /* Nimble.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		C4AD460ED2FB5EC50A132D51 /* Future.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Future.swift; sourceTree = "<group>"; };
 		C4AD4900CF0288FB8622C59E /* AsyncAwait.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AsyncAwait.swift; sourceTree = "<group>"; };
@@ -35,6 +50,7 @@
 		D3B69FD61F20A2F00008176C /* AsyncAwaitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AsyncAwaitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3B69FDB1F20A2F00008176C /* AsyncAwaitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncAwaitTests.swift; sourceTree = "<group>"; };
 		D3B69FDD1F20A2F00008176C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D3F1D3CB1F20FC9B001DA4DC /* Nimble.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Nimble.framework; path = Carthage/Build/iOS/Nimble.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,6 +66,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D3B69FD71F20A2F00008176C /* AsyncAwait.framework in Frameworks */,
+				D3F1D3CC1F20FC9B001DA4DC /* Nimble.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -62,6 +79,7 @@
 				D3B69FCF1F20A2F00008176C /* AsyncAwait */,
 				D3B69FDA1F20A2F00008176C /* AsyncAwaitTests */,
 				D3B69FCE1F20A2F00008176C /* Products */,
+				D3F1D3CA1F20FC9B001DA4DC /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -93,6 +111,14 @@
 				D3B69FDD1F20A2F00008176C /* Info.plist */,
 			);
 			path = AsyncAwaitTests;
+			sourceTree = "<group>";
+		};
+		D3F1D3CA1F20FC9B001DA4DC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D3F1D3CB1F20FC9B001DA4DC /* Nimble.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -134,6 +160,7 @@
 				D3B69FD21F20A2F00008176C /* Sources */,
 				D3B69FD31F20A2F00008176C /* Frameworks */,
 				D3B69FD41F20A2F00008176C /* Resources */,
+				D3F1D3CD1F20FE2C001DA4DC /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -372,6 +399,10 @@
 		D3B69FE51F20A2F00008176C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = AsyncAwaitTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.codewise.AsyncAwaitTests;
@@ -383,6 +414,10 @@
 		D3B69FE61F20A2F00008176C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = AsyncAwaitTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.codewise.AsyncAwaitTests;
@@ -410,6 +445,7 @@
 				D3B69FE31F20A2F00008176C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		D3B69FE41F20A2F00008176C /* Build configuration list for PBXNativeTarget "AsyncAwaitTests" */ = {
 			isa = XCConfigurationList;
@@ -418,6 +454,7 @@
 				D3B69FE61F20A2F00008176C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

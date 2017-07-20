@@ -8,6 +8,7 @@
 
 import XCTest
 @testable import AsyncAwait
+import Nimble
 
 enum TestError: Error {
     case test
@@ -46,12 +47,6 @@ class AsyncAwaitTests: XCTestCase {
             completion("Done")
         }
 
-//        XCTAssertThrowsError({
-            try? sut.await()
-        assertionFailure()
-//        })
-
-
-
+        expect { _ = try sut.await() }.to(throwAssertion())
     }
 }
