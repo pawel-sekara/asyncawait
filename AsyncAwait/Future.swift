@@ -14,21 +14,58 @@ public protocol FutureType {
     func await() throws -> Value
 }
 
+/**
+*
+*   working -> (success | failure)
+*
+*/
 open class Future<T>: FutureType {
-    open private(set) var value: T?
-    open private(set) var error: Error?
 
+    indirect fileprivate enum State {
+        case working
+        case success(T)
+        case failure(Error)
+
+        mutating func `switch`(_ state: State) {
+            guard case .working = self else { return }
+            self = state
+        }
+    }
+
+    open var value: T? {
+        if case let .success(value) = _state {
+            return value
+        }
+        return nil
+    }
+
+    open var error: Error? {
+        if case let .failure(error) = _state {
+            return error
+        }
+        return nil
+    }
+
+    private var _state: State = .working { didSet { _semaphore.signal()  } }
     private let _semaphore = DispatchSemaphore(value: 0)
 
-    init(completion: @escaping (@escaping (T) -> ()) throws -> ()) {
+    //TODO: what if there is completion call and then error is thrown? or opposite direction? error and then value?
+    public init(completion: @escaping (@escaping (T) -> ()) throws -> ()) {
         do {
             try completion { [weak self] (value) in
-                self?.value = value
-                self?._semaphore.signal()
+                self?._state.switch(.success(value))
             }
         } catch {
-            self.error = error
-            _semaphore.signal()
+            self._state.switch(.failure(error))
+        }
+    }
+
+    //TODO: this needs to be tested for multiple calls of accept and reject
+    public init(completion: @escaping (_ accept: @escaping (T) -> (), _ reject: @escaping (Error) -> ()) -> ()) {
+        completion({ [weak self] (accept) in
+            self?._state.switch(.success(accept))
+        }) { [weak self] (reject) in
+            self?._state.switch(.failure(reject))
         }
     }
 
@@ -41,10 +78,10 @@ open class Future<T>: FutureType {
             fatalError("Await shall not be called on main thread.")
         }
 
-        if let value = value {
-            return value
-        } else if let error = error {
+        if let error = error {
             throw error
+        } else if let value = value {
+            return value
         }
 
         let timeout = _semaphore.wait(timeout: .now() + timeoutInterval)
