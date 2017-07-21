@@ -49,18 +49,7 @@ open class Future<T>: FutureType {
     private var _state: State = .working { didSet { _semaphore.signal()  } }
     private let _semaphore = DispatchSemaphore(value: 0)
 
-    //TODO: what if there is completion call and then error is thrown? or opposite direction? error and then value?
-    public init(completion: @escaping (@escaping (T) -> ()) throws -> ()) {
-        do {
-            try completion { [weak self] (value) in
-                self?._state.switch(.success(value))
-            }
-        } catch {
-            self._state.switch(.failure(error))
-        }
-    }
 
-    //TODO: this needs to be tested for multiple calls of accept and reject
     public init(completion: @escaping (_ accept: @escaping (T) -> (), _ reject: @escaping (Error) -> ()) -> ()) {
         completion({ [weak self] (accept) in
             self?._state.switch(.success(accept))
@@ -97,4 +86,19 @@ open class Future<T>: FutureType {
         return value!
     }
 
+}
+
+public extension Future {
+
+    public convenience init(completion: @escaping (@escaping (T) -> ()) throws -> ()) {
+        self.init { (accept, reject) in
+            do {
+                try completion { value in
+                    accept(value)
+                }
+            } catch {
+                reject(error)
+            }
+        }
+    }
 }
