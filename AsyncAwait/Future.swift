@@ -41,6 +41,12 @@ open class Future<T>: FutureType {
             fatalError("Await shall not be called on main thread.")
         }
 
+        if let value = value {
+            return value
+        } else if let error = error {
+            throw error
+        }
+
         let timeout = _semaphore.wait(timeout: .now() + timeoutInterval)
 
         if case .timedOut = timeout {

@@ -7,7 +7,13 @@ import Foundation
 
 public class AsyncAwait {
     static let async = DispatchQueue(label: "com.codewise.async", attributes: .concurrent)
-    public static var synchronousMode = false
+    public static var synchronousMode = false {
+        didSet {
+            if synchronousMode && (NSClassFromString("XCTest") == nil) {
+                print("WARNING: Synchronous mode has been turned on, make sure app is in test mode.")
+            }
+        }
+    }
 
     public static func async(invoke: @escaping () -> ()) {
         if isTesting {
