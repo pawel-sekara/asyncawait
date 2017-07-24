@@ -157,7 +157,7 @@ class AsyncAwaitTests: XCTestCase {
         }
 
         expect(array).to(haveCount(0))
-        expect(array).toEventually(beginWith("Done2"), timeout: 2.1) //toEventually matcher is blocking
+        expect(array).toEventually(beginWith("Done2"), timeout: 2.1)
         expect(array).to(endWith("Done1"))
     }
 
