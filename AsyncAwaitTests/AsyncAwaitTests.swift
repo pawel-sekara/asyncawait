@@ -67,7 +67,7 @@ class AsyncAwaitTests: XCTestCase {
     }
 
     func testFutureInit_multipleCompletionsAreFired_firstValueIsReceived() {
-        let sut = Future<String> { (completion: ((String) -> ())) in
+        let sut = Future<String> { (completion) in
             completion("Done")
             completion("Done2")
         }
