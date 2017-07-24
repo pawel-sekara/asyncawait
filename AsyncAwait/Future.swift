@@ -19,11 +19,11 @@ public protocol FutureType {
 *   working -> (success | failure)
 *
 */
-open class Future<T>: FutureType {
+open class Future<Value>: FutureType {
 
     indirect fileprivate enum State {
         case working
-        case success(T)
+        case success(Value)
         case failure(Error)
 
         mutating func `switch`(_ state: State) {
@@ -32,7 +32,7 @@ open class Future<T>: FutureType {
         }
     }
 
-    open var value: T? {
+    open var value: Value? {
         if case let .success(value) = _state {
             return value
         }
@@ -50,7 +50,7 @@ open class Future<T>: FutureType {
     private let _semaphore = DispatchSemaphore(value: 0)
 
 
-    public init(completion: @escaping (_ accept: @escaping (T) -> (), _ reject: @escaping (Error) -> ()) -> ()) {
+    public init(completion: @escaping (_ accept: @escaping (Value) -> (), _ reject: @escaping (Error) -> ()) -> ()) {
         completion({ [weak self] (accept) in
             self?._state.switch(.success(accept))
         }) { [weak self] (reject) in
@@ -62,7 +62,7 @@ open class Future<T>: FutureType {
         return try await(timeoutInterval: .seconds(60))
     }
 
-    open func await(timeoutInterval: DispatchTimeInterval) throws -> T {
+    open func await(timeoutInterval: DispatchTimeInterval) throws -> Value {
         guard !Thread.isMainThread || AsyncAwait.isTesting else {
             fatalError("Await shall not be called on main thread.")
         }
@@ -90,7 +90,7 @@ open class Future<T>: FutureType {
 
 public extension Future {
 
-    public convenience init(completion: @escaping (@escaping (T) -> ()) throws -> ()) {
+    public convenience init(completion: @escaping (@escaping (Value) -> ()) throws -> ()) {
         self.init { (accept, reject) in
             do {
                 try completion { value in
@@ -98,6 +98,18 @@ public extension Future {
                 }
             } catch {
                 reject(error)
+            }
+        }
+    }
+
+    public func map<T>(_ closure: @escaping ((Value) throws -> T)) -> Future<T> {
+        return Future<T> { (accept, reject) in
+            AsyncAwait.async {
+                do {
+                    let value = try self.await()
+                    let mapped = try closure(value)
+                    accept(mapped)
+                } catch { reject(error) }
             }
         }
     }
