@@ -102,9 +102,25 @@ public extension Future {
         }
     }
 
+    public convenience init(error: Error) {
+        self.init { (_) in
+            throw error
+        }
+    }
+
+    public convenience init(value: Value) {
+        self.init { (accept) in
+            accept(value)
+        }
+    }
+
+}
+
+public extension Future {
+
     public func map<T>(_ closure: @escaping ((Value) throws -> T)) -> Future<T> {
         return Future<T> { (accept, reject) in
-            AsyncAwait.async {
+            async {
                 do {
                     let value = try self.await()
                     let mapped = try closure(value)
@@ -113,4 +129,5 @@ public extension Future {
             }
         }
     }
+
 }
