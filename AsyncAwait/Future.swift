@@ -145,17 +145,10 @@ public extension Future {
         }
     }
 
-    public static func combine<T, K>(_ future1: Future<T>, _ future2: Future<K>) -> Future<(T, K)> {
-        return Future<(T, K)> { (accept, reject) in
-            async {
-                do {
-                    let value1 = try future1.await()
-                    let value2 = try future2.await()
-                    accept((value1, value2))
-                } catch {
-                    reject(error)
-                }
-            }
+    public func combine<T: Future>(with future: T) -> Future<(Value, T.Value)> {
+        return self.map { (value) in
+            let value2 = try future.await()
+            return (value, value2)
         }
     }
 
