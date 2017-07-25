@@ -14,6 +14,12 @@ public protocol FutureType {
     func await() throws -> Value
 }
 
+public protocol FutureConvertible {
+    associatedtype Value
+
+    var future: Future<Value> { get }
+}
+
 /**
 *
 *   working -> (success | failure)
@@ -85,7 +91,12 @@ open class Future<Value>: FutureType {
 
         return value!
     }
+}
 
+extension Future: FutureConvertible {
+    public var future: Future {
+        return self
+    }
 }
 
 public extension Future {
@@ -145,11 +156,23 @@ public extension Future {
         }
     }
 
-    public func combine<T: Future>(with future: T) -> Future<(Value, T.Value)> {
-        return self.map { (value) in
-            let value2 = try future.await()
-            return (value, value2)
-        }
-    }
+//    public func combine<A: FutureConvertible>(with future: A) -> Future<(Value, A.Value)> {
+//        return self.map { (val) -> (Value, A.Value) in
+//            let val2 = try future.future.await()
+//            return (val, val2)
+//        }
+//    }
+
+
+//    public static func combine<A: Future, B: Future>(_ future1: A, _ future2: B) -> Future<(Value, B.Value)> where A.Value == Value {
+//        return future1.combine(with: future2)
+//    }
+//
+//    public func combine<T: Future>(with future: T) -> Future<(Value, T.Value)> {
+//        return self.map { (value) in
+//            let value2 = try future.await()
+//            return (value, value2)
+//        }
+//    }
 
 }

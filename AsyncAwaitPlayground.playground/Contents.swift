@@ -9,20 +9,6 @@ enum TestError: Error {
 }
 
 
-extension Future {
-    func map<K>(_ closure: @escaping ((T) throws -> K)) -> Future<K> {
-        return Future<K> { (accept, reject) in
-            async { do {
-                    let value = try self.await()
-                    let mapped = try closure(value)
-                    accept(mapped)
-                } catch { reject(error) }
-            }
-        }
-    }
-}
-
-
 func doSomethingAsync(_ completion: @escaping (Int) -> ()) {
     DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(1)) {
         completion(1234)
@@ -43,8 +29,16 @@ let future = doSomethingInFuture().map { (value) -> String in
     return "Mapped \(value)"
 }
 
+let future2 = Future<String>(value: "hehe")
+
+//future.combine(with: future2)
+
+//future.combine(with: future2)
+
 async { do {
     print("execution of async")
+
+//    print(try future.combine(with: future2).await())
         print(try future.await())
         print(try future.await())
     } catch {
@@ -52,5 +46,5 @@ async { do {
     }
 }
 
-PlaygroundPage.current.needsIndefiniteExecution = true
+//PlaygroundPage.current.needsIndefiniteExecution = true
 
