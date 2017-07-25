@@ -130,4 +130,33 @@ public extension Future {
         }
     }
 
+    public func flatMap<T>(_ closure: @escaping ((Value) throws -> Future<T>)) -> Future<T> {
+        return Future<T> { (accept, reject) in
+            async {
+                do {
+                    let value = try self.await()
+                    let mappedFuture = try closure(value)
+                    let resultingValue = try mappedFuture.await()
+                    accept(resultingValue)
+                } catch {
+                    reject(error)
+                }
+            }
+        }
+    }
+
+    public static func combine<T, K>(_ future1: Future<T>, _ future2: Future<K>) -> Future<(T, K)> {
+        return Future<(T, K)> { (accept, reject) in
+            async {
+                do {
+                    let value1 = try future1.await()
+                    let value2 = try future2.await()
+                    accept((value1, value2))
+                } catch {
+                    reject(error)
+                }
+            }
+        }
+    }
+
 }
