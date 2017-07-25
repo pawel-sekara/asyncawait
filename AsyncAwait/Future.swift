@@ -5,11 +5,6 @@
 
 import Foundation
 
-public protocol FutureProtocol {
-    associatedtype Value
-
-    var future: Future<Value> { get }
-}
 
 /**
 *
@@ -84,6 +79,15 @@ open class Future<Value> {
     }
 }
 
+/**
+* FutureProtocol - used for generic constraints
+*/
+public protocol FutureProtocol {
+    associatedtype Value
+
+    var future: Future<Value> { get }
+}
+
 extension Future: FutureProtocol {
     public var future: Future {
         return self
@@ -147,16 +151,16 @@ public extension Future {
         }
     }
 
-//    public func combine<A: FutureProtocol>(with future: A) -> Future<(Value, A.Value)> {
-//        return self.map({ (val) -> (Value, A.Value) in
-//            let val2 = try future.future.await()
-//            return (val, val2)
-//        })
-//    }
-//
-//    public static func combine<A: FutureProtocol, B: FutureProtocol>(_ future1: A, _ future2: B) -> Future<(Value, B.Value)> where A.Value == Value {
-//        return future1.future.combine(with: future2)
-//    }
+    public func combine<A: FutureProtocol>(with future: A) -> Future<(Value, A.Value)> {
+        return self.map({ (val) -> (Value, A.Value) in
+            let val2 = try future.future.await()
+            return (val, val2)
+        })
+    }
+
+    public static func combine<A: FutureProtocol, B: FutureProtocol>(_ future1: A, _ future2: B) -> Future<(Value, B.Value)> where A.Value == Value {
+        return future1.future.combine(with: future2)
+    }
 
 }
 
