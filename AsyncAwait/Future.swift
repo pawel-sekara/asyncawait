@@ -5,16 +5,7 @@
 
 import Foundation
 
-public protocol FutureType {
-    associatedtype Value
-
-    var value: Value? { get }
-    var error: Error? { get }
-
-    func await() throws -> Value
-}
-
-public protocol FutureConvertible {
+public protocol FutureProtocol {
     associatedtype Value
 
     var future: Future<Value> { get }
@@ -25,7 +16,7 @@ public protocol FutureConvertible {
 *   working -> (success | failure)
 *
 */
-open class Future<Value>: FutureType {
+open class Future<Value> {
 
     indirect fileprivate enum State {
         case working
@@ -93,7 +84,7 @@ open class Future<Value>: FutureType {
     }
 }
 
-extension Future: FutureConvertible {
+extension Future: FutureProtocol {
     public var future: Future {
         return self
     }
@@ -156,23 +147,17 @@ public extension Future {
         }
     }
 
-//    public func combine<A: FutureConvertible>(with future: A) -> Future<(Value, A.Value)> {
-//        return self.map { (val) -> (Value, A.Value) in
+//    public func combine<A: FutureProtocol>(with future: A) -> Future<(Value, A.Value)> {
+//        return self.map({ (val) -> (Value, A.Value) in
 //            let val2 = try future.future.await()
 //            return (val, val2)
-//        }
-//    }
-
-
-//    public static func combine<A: Future, B: Future>(_ future1: A, _ future2: B) -> Future<(Value, B.Value)> where A.Value == Value {
-//        return future1.combine(with: future2)
+//        })
 //    }
 //
-//    public func combine<T: Future>(with future: T) -> Future<(Value, T.Value)> {
-//        return self.map { (value) in
-//            let value2 = try future.await()
-//            return (value, value2)
-//        }
+//    public static func combine<A: FutureProtocol, B: FutureProtocol>(_ future1: A, _ future2: B) -> Future<(Value, B.Value)> where A.Value == Value {
+//        return future1.future.combine(with: future2)
 //    }
 
 }
+
+
