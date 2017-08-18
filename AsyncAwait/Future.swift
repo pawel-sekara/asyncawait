@@ -129,8 +129,12 @@ public extension Future {
             async {
                 do {
                     let value = try self.await()
-                    let mapped = try closure(value)
-                    accept(mapped)
+                    main {
+                        do {
+                            let mapped = try closure(value)
+                            accept(mapped)
+                        } catch { reject(error) }
+                    }
                 } catch { reject(error) }
             }
         }
