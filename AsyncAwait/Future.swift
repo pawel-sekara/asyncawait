@@ -156,10 +156,15 @@ public extension Future {
     }
 
     public func combine<A: FutureProtocol>(with future: A) -> Future<(Value, A.Value)> {
-        return self.map({ (val) -> (Value, A.Value) in
-            let val2 = try future.future.await()
-            return (val, val2)
-        })
+        return Future<(Value, A.Value)> { (a, r) in
+            async {
+                do {
+                    let val = try self.await()
+                    let val2 = try future.future.await()
+                    a((val, val2))
+                } catch { r(error) }
+            }
+        }
     }
 
     public static func combine<A: FutureProtocol, B: FutureProtocol>(_ future1: A, _ future2: B) -> Future<(Value, B.Value)> where A.Value == Value {
