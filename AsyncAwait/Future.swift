@@ -140,6 +140,18 @@ public extension Future {
         }
     }
 
+    public func mapAsync<T>(_ closure: @escaping ((Value) throws -> T)) -> Future<T> {
+        return Future<T> { (a, r) in
+            async {
+                do {
+                    let value = try self.await()
+                    let mapped = try closure(value)
+                    a(mapped)
+                } catch { r(error) }
+            }
+        }
+    }
+
     public func flatMap<T>(_ closure: @escaping ((Value) throws -> Future<T>)) -> Future<T> {
         return Future<T> { (accept, reject) in
             async {
