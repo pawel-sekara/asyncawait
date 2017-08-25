@@ -17,6 +17,7 @@ open class Future<Value> {
         case working
         case success(Value)
         case failure(Error)
+        case cancelled
 
         mutating func `switch`(_ state: State) {
             guard case .working = self else { return }
@@ -34,14 +35,15 @@ open class Future<Value> {
     open var error: Error? {
         if case let .failure(error) = _state {
             return error
+        } else if case .cancelled = _state {
+            return AwaitError.cancelled
         }
         return nil
     }
 
-    private var _state: State = .working { didSet { _semaphore.signal()  } }
+    private var _state: State = .working { didSet { _semaphore.signal() } }
     private let _semaphore = DispatchSemaphore(value: 0)
-
-
+    
     public init(completion: @escaping (_ accept: @escaping (Value) -> (), _ reject: @escaping (Error) -> ()) -> ()) {
         completion({ [weak self] (accept) in
             self?._state.switch(.success(accept))
@@ -76,6 +78,10 @@ open class Future<Value> {
         }
 
         return value!
+    }
+
+    open func cancel() {
+        _state.switch(.cancelled)
     }
 }
 
