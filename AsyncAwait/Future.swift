@@ -131,8 +131,7 @@ public extension Future {
 
     public func on(completion: ((Value) -> Void)? = nil, failure: ((Error) -> Void)? = nil) -> Future<Value> {
         return Future<Value> { (accept, reject) in
-            async { [weak self] in
-                guard let `self` = self else { reject(AwaitError.nilValue); return }
+            async {
                 do {
                     let value = try self.await()
                     completion?(value)
@@ -150,8 +149,7 @@ public extension Future {
 
     public func map<T>(_ closure: @escaping ((Value) throws -> T)) -> Future<T> {
         return Future<T> { (accept, reject) in
-            async { [weak self] in
-                guard let `self` = self else { reject(AwaitError.nilValue); return }
+            async {
                 do {
                     let value = try self.await()
                     main {
@@ -167,8 +165,7 @@ public extension Future {
 
     public func mapAsync<T>(_ closure: @escaping ((Value) throws -> T)) -> Future<T> {
         return Future<T> { (accept, reject) in
-            async { [weak self] in
-                guard let `self` = self else { reject(AwaitError.nilValue); return }
+            async {
                 do {
                     let value = try self.await()
                     let mapped = try closure(value)
@@ -180,8 +177,7 @@ public extension Future {
 
     public func flatMap<T>(_ closure: @escaping ((Value) throws -> Future<T>)) -> Future<T> {
         return Future<T> { (accept, reject) in
-            async { [weak self] in
-                guard let `self` = self else { reject(AwaitError.nilValue); return }
+            async {
                 do {
                     let value = try self.await()
                     let mappedFuture = try closure(value)
@@ -196,8 +192,8 @@ public extension Future {
 
     public func combine<A: FutureProtocol>(with future: A) -> Future<(Value, A.Value)> {
         return Future<(Value, A.Value)> { (accept, reject) in
-            async { [weak self] in
-                guard let `self` = self else { reject(AwaitError.nilValue); return }
+            async {
+
                 do {
                     let val = try self.await()
                     let val2 = try future.future.await()

@@ -10,6 +10,7 @@
 		C4AD48EDD1E6BEE361E5E310 /* Future.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4AD460ED2FB5EC50A132D51 /* Future.swift */; };
 		C4AD4A9B1FC21B119DE3D0EE /* AwaitError.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4AD4CC15BCEB0182D9F8753 /* AwaitError.swift */; };
 		C4AD4BD149558877AB62C6C3 /* AsyncAwait.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4AD4900CF0288FB8622C59E /* AsyncAwait.swift */; };
+		D33195491F602E510025B71B /* Nimble.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D3F1D3CB1F20FC9B001DA4DC /* Nimble.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D3B69FD71F20A2F00008176C /* AsyncAwait.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3B69FCD1F20A2F00008176C /* AsyncAwait.framework */; };
 		D3B69FDC1F20A2F00008176C /* AsyncAwaitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B69FDB1F20A2F00008176C /* AsyncAwaitTests.swift */; };
 		D3B69FDE1F20A2F00008176C /* AsyncAwait.h in Headers */ = {isa = PBXBuildFile; fileRef = D3B69FD01F20A2F00008176C /* AsyncAwait.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -32,6 +33,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				D33195491F602E510025B71B /* Nimble.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
