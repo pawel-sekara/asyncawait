@@ -45,10 +45,10 @@ open class Future<Value> {
     private let _semaphore = DispatchSemaphore(value: 0)
     
     public init(completion: @escaping (_ accept: @escaping (Value) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
-        completion({ [weak self] (accept) in
-            self?._state.switch(.success(accept))
-        }) { [weak self] (reject) in
-            self?._state.switch(.failure(reject))
+        completion({ (accept) in
+            self._state.switch(.success(accept))
+        }) { (reject) in
+            self._state.switch(.failure(reject))
         }
     }
 
