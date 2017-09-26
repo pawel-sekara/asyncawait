@@ -5,26 +5,19 @@
 
 import Foundation
 
-public protocol FutureType {
-    associatedtype Value
-
-    var value: Value? { get }
-    var error: Error? { get }
-
-    func await() throws -> Value
-}
 
 /**
 *
 *   working -> (success | failure)
 *
 */
-open class Future<T>: FutureType {
+open class Future<Value> {
 
     indirect fileprivate enum State {
         case working
-        case success(T)
+        case success(Value)
         case failure(Error)
+        case cancelled
 
         mutating func `switch`(_ state: State) {
             guard case .working = self else { return }
@@ -32,7 +25,7 @@ open class Future<T>: FutureType {
         }
     }
 
-    open var value: T? {
+    open var value: Value? {
         if case let .success(value) = _state {
             return value
         }
@@ -42,19 +35,20 @@ open class Future<T>: FutureType {
     open var error: Error? {
         if case let .failure(error) = _state {
             return error
+        } else if case .cancelled = _state {
+            return AwaitError.cancelled
         }
         return nil
     }
 
-    private var _state: State = .working { didSet { _semaphore.signal()  } }
+    private var _state: State = .working { didSet { _semaphore.signal() } }
     private let _semaphore = DispatchSemaphore(value: 0)
-
-
-    public init(completion: @escaping (_ accept: @escaping (T) -> (), _ reject: @escaping (Error) -> ()) -> ()) {
-        completion({ [weak self] (accept) in
-            self?._state.switch(.success(accept))
-        }) { [weak self] (reject) in
-            self?._state.switch(.failure(reject))
+    
+    public init(completion: @escaping (_ accept: @escaping (Value) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
+        completion({ (accept) in
+            self._state.switch(.success(accept))
+        }) { (reject) in
+            self._state.switch(.failure(reject))
         }
     }
 
@@ -62,7 +56,7 @@ open class Future<T>: FutureType {
         return try await(timeoutInterval: .seconds(60))
     }
 
-    open func await(timeoutInterval: DispatchTimeInterval) throws -> T {
+    open func await(timeoutInterval: DispatchTimeInterval) throws -> Value {
         guard !Thread.isMainThread || AsyncAwait.isTesting else {
             fatalError("Await shall not be called on main thread.")
         }
@@ -86,11 +80,29 @@ open class Future<T>: FutureType {
         return value!
     }
 
+    open func cancel() {
+        _state.switch(.cancelled)
+    }
+}
+
+/**
+* FutureProtocol - used for generic constraints
+*/
+public protocol FutureProtocol {
+    associatedtype Value
+
+    var future: Future<Value> { get }
+}
+
+extension Future: FutureProtocol {
+    public var future: Future {
+        return self
+    }
 }
 
 public extension Future {
 
-    public convenience init(completion: @escaping (@escaping (T) -> ()) throws -> ()) {
+    public convenience init(completion: @escaping (@escaping (Value) -> ()) throws -> ()) {
         self.init { (accept, reject) in
             do {
                 try completion { value in
@@ -101,4 +113,100 @@ public extension Future {
             }
         }
     }
+
+    public convenience init(error: Error) {
+        self.init { (_) in
+            throw error
+        }
+    }
+
+    public convenience init(value: Value) {
+        self.init { (accept) in
+            accept(value)
+        }
+    }
 }
+
+public extension Future {
+
+    public func on(completion: ((Value) -> Void)? = nil, failure: ((Error) -> Void)? = nil) -> Future<Value> {
+        return Future<Value> { (accept, reject) in
+            async {
+                do {
+                    let value = try self.await()
+                    completion?(value)
+                    accept(value)
+                } catch {
+                    failure?(error)
+                    reject(error)
+                }
+            }
+        }
+    }
+}
+
+public extension Future {
+
+    public func map<T>(_ closure: @escaping ((Value) throws -> T)) -> Future<T> {
+        return Future<T> { (accept, reject) in
+            async {
+                do {
+                    let value = try self.await()
+                    main {
+                        do {
+                            let mapped = try closure(value)
+                            accept(mapped)
+                        } catch { reject(error) }
+                    }
+                } catch { reject(error) }
+            }
+        }
+    }
+
+    public func mapAsync<T>(_ closure: @escaping ((Value) throws -> T)) -> Future<T> {
+        return Future<T> { (accept, reject) in
+            async {
+                do {
+                    let value = try self.await()
+                    let mapped = try closure(value)
+                    accept(mapped)
+                } catch { reject(error) }
+            }
+        }
+    }
+
+    public func flatMap<T>(_ closure: @escaping ((Value) throws -> Future<T>)) -> Future<T> {
+        return Future<T> { (accept, reject) in
+            async {
+                do {
+                    let value = try self.await()
+                    let mappedFuture = try closure(value)
+                    let resultingValue = try mappedFuture.await()
+                    accept(resultingValue)
+                } catch {
+                    reject(error)
+                }
+            }
+        }
+    }
+
+    public func combine<A: FutureProtocol>(with future: A) -> Future<(Value, A.Value)> {
+        return Future<(Value, A.Value)> { (accept, reject) in
+            async {
+
+                do {
+                    let val = try self.await()
+                    let val2 = try future.future.await()
+                    accept((val, val2))
+                } catch { reject(error) }
+            }
+        }
+    }
+
+    public static func combine<A: FutureProtocol, B: FutureProtocol>(_ future1: A, _ future2: B) -> Future<(Value, B.Value)> where A.Value == Value {
+        return future1.future.combine(with: future2)
+    }
+
+}
+
+

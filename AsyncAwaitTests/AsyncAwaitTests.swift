@@ -67,7 +67,7 @@ class AsyncAwaitTests: XCTestCase {
     }
 
     func testFutureInit_multipleCompletionsAreFired_firstValueIsReceived() {
-        let sut = Future<String> { (completion: ((String) -> ())) in
+        let sut = Future<String> { (completion) in
             completion("Done")
             completion("Done2")
         }
@@ -114,6 +114,24 @@ class AsyncAwaitTests: XCTestCase {
     }
 
     //MARK: - Await in normal mode
+
+    func testFutureAwait_awaitCalledWithVoid_everythingShouldWorkJustFine() {
+        let sut = Future<Void> { completion in
+            completion(())
+        }
+
+        var err: Error?
+        async {
+            do {
+                try sut.await()
+            } catch {
+                err = error
+            }
+        }
+
+        expect(sut.value).toEventuallyNot(beNil())
+        expect(sut.error).to(beNil())
+    }
 
     func testFutureAwait_awaitCalledInMainThread_fatalErrorIsThrown() {
         let sut = Future<String> { completion in
