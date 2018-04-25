@@ -7,7 +7,7 @@ import Foundation
 
 public struct AsyncAwait {
     internal static let async = DispatchQueue(label: "com.codewise.async", attributes: .concurrent)
-
+    
     public static var synchronousMode = false {
         didSet {
             if synchronousMode && (NSClassFromString("XCTest") == nil) {
@@ -15,7 +15,7 @@ public struct AsyncAwait {
             }
         }
     }
-
+    
     public static func async(invoke: @escaping () -> ()) {
         if isTesting {
             invoke()
@@ -25,7 +25,7 @@ public struct AsyncAwait {
             }
         }
     }
-
+    
     public static func main(invoke: @escaping () -> ()) {
         if isTesting {
             invoke()
@@ -35,7 +35,7 @@ public struct AsyncAwait {
             }
         }
     }
-
+    
     static var isTesting: Bool {
         return (NSClassFromString("XCTest") != nil) && synchronousMode
     }
@@ -52,7 +52,7 @@ public func main(invoke: @escaping () -> ()) {
 
 public struct AsyncAwaitExtensionProvider<Base> {
     public let base: Base
-
+    
     fileprivate init(_ base: Base) {
         self.base = base
     }
@@ -64,7 +64,7 @@ public extension AsyncAwaitExtension {
     public var async: AsyncAwaitExtensionProvider<Self> {
         return AsyncAwaitExtensionProvider(self)
     }
-
+    
     public static var async: AsyncAwaitExtensionProvider<Self>.Type {
         return AsyncAwaitExtensionProvider<Self>.self
     }
