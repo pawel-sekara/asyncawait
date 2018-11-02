@@ -41,7 +41,7 @@ open class Future<Value> {
         return nil
     }
     
-    private var _state: State = .working { didSet { _semaphore.signal() } }
+    private var _state: State = .working { didSet { while (_semaphore.signal() != 0) {} } }
     private let _semaphore = DispatchSemaphore(value: 0)
     
     public init(completion: @escaping (_ accept: @escaping (Value) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
