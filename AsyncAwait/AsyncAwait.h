@@ -3,7 +3,6 @@
 //  AsyncAwait
 //
 //  Created by Paweł Sękara on 20.07.2017.
-//  Copyright © 2017 Codewise sp. z o.o. sp. K. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>

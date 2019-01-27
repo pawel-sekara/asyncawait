@@ -3,7 +3,6 @@
 //  AsyncAwaitTests
 //
 //  Created by Paweł Sękara on 20.07.2017.
-//  Copyright © 2017 Codewise sp. z o.o. sp. K. All rights reserved.
 //
 
 import XCTest
@@ -260,5 +259,23 @@ class AsyncAwaitTests: XCTestCase {
         async {
             expect(try? sut.await()) == "Done"
         }
+    }
+    
+    func testFutureAwait_awaitCancelled_errorIsThrown() {
+        AsyncAwait.synchronousMode = true
+        let sut = Future<String> { completion in
+            DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(2), execute: {
+                completion("Done")
+            })
+        }
+        
+        DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(1)) {
+            sut.cancel()
+        }
+        
+        expect {
+            _ = try sut.await()
+        }.to(throwError(AwaitError.cancelled))
+        
     }
 }
